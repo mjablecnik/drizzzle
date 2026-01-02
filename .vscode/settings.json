@@ -7,4 +7,5 @@
         "editor.defaultFormatter": "Dart-Code.dart-code",
         "editor.inlayHints.enabled": "offUnlessPressed"
     },
+    "kiroAgent.configureMCP": "Disabled",
 }

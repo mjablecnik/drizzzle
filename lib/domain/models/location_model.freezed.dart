@@ -14,6 +14,10 @@ T _$identity<T>(T value) => value;
 final _privateConstructorUsedError = UnsupportedError(
     'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
+LocationModel _$LocationModelFromJson(Map<String, dynamic> json) {
+  return _LocationModel.fromJson(json);
+}
+
 /// @nodoc
 mixin _$LocationModel {
   String get name => throw _privateConstructorUsedError;
@@ -22,6 +26,9 @@ mixin _$LocationModel {
   String? get timezone => throw _privateConstructorUsedError;
   String? get admin1 => throw _privateConstructorUsedError;
   String? get country => throw _privateConstructorUsedError;
+
+  /// Serializes this LocationModel to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
   /// Create a copy of LocationModel
   /// with the given fields replaced by the non-null parameter values.
@@ -163,7 +170,7 @@ class __$$LocationModelImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-
+@JsonSerializable()
 class _$LocationModelImpl implements _LocationModel {
   const _$LocationModelImpl(
       {required this.name,
@@ -172,6 +179,9 @@ class _$LocationModelImpl implements _LocationModel {
       required this.timezone,
       required this.admin1,
       required this.country});
+
+  factory _$LocationModelImpl.fromJson(Map<String, dynamic> json) =>
+      _$$LocationModelImplFromJson(json);
 
   @override
   final String name;
@@ -207,6 +217,7 @@ class _$LocationModelImpl implements _LocationModel {
             (identical(other.country, country) || other.country == country));
   }
 
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
       runtimeType, name, latitude, longitude, timezone, admin1, country);
@@ -218,6 +229,13 @@ class _$LocationModelImpl implements _LocationModel {
   @pragma('vm:prefer-inline')
   _$$LocationModelImplCopyWith<_$LocationModelImpl> get copyWith =>
       __$$LocationModelImplCopyWithImpl<_$LocationModelImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$LocationModelImplToJson(
+      this,
+    );
+  }
 }
 
 abstract class _LocationModel implements LocationModel {
@@ -228,6 +246,9 @@ abstract class _LocationModel implements LocationModel {
       required final String? timezone,
       required final String? admin1,
       required final String? country}) = _$LocationModelImpl;
+
+  factory _LocationModel.fromJson(Map<String, dynamic> json) =
+      _$LocationModelImpl.fromJson;
 
   @override
   String get name;

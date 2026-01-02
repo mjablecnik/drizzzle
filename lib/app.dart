@@ -19,13 +19,22 @@ class _AppState extends State<App> {
 
     final WeatherViewModel weatherViewModel = context.read<WeatherViewModel>();
     Future.microtask(() async {
-      // For testing purposes, let's try to fetch fresh data
-      // You can comment this out and use getLocalWeather() for production
+      // Load stored location first
+      await weatherViewModel.loadStoredLocation();
+      
+      // Try to get local weather first
       try {
-        // Try to get local weather first, but if we want fresh data, we need location
         await weatherViewModel.getLocalWeather();
       } catch (e) {
-        // Error loading local weather - this is expected on first run
+        // If local weather fails and we have a stored location, try to refresh from stored location
+        if (weatherViewModel.hasStoredLocation()) {
+          try {
+            await weatherViewModel.refreshWeatherFromStoredLocation();
+          } catch (e) {
+            // Error refreshing from stored location - this is expected if API is unavailable
+          }
+        }
+        // If no stored location and no local weather, user will need to search for a location
       }
     });
   }

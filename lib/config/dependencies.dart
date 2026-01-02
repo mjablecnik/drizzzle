@@ -1,6 +1,8 @@
 import 'package:drizzzle/data/repositories/api_remote/location_repository.dart';
 import 'package:drizzzle/data/repositories/api_remote/weather_repository.dart';
+import 'package:drizzzle/data/repositories/storage_local/location_storage_repository.dart';
 import 'package:drizzzle/data/services/db_local/db_client.dart';
+import 'package:drizzzle/data/services/storage_local/location_storage_service.dart';
 import 'package:drizzzle/ui/home/view_models/daily_selection_view_model.dart';
 import 'package:drizzzle/ui/home/view_models/home_view_model.dart';
 import 'package:drizzzle/ui/home/view_models/unit_view_model.dart';
@@ -15,6 +17,13 @@ List<SingleChildWidget> providers(DbClient dbClient, SharedPreferences pref) {
   final LocationRepository locationRepository = LocationRepository();
   final WeatherRepository weatherRepository =
       WeatherRepository(dbClient: dbClient);
+  
+  // Create location storage services
+  final LocationStorageService locationStorageService = 
+      LocationStorageService(prefs: pref);
+  final LocationStorageRepository locationStorageRepository = 
+      LocationStorageRepository(storageService: locationStorageService);
+  
   final brightness = pref.getBool(SharedPreferencesKeys.brightnessKey);
   final indx = pref.getInt(SharedPreferencesKeys.colorKey);
 
@@ -34,7 +43,10 @@ List<SingleChildWidget> providers(DbClient dbClient, SharedPreferences pref) {
         create: (_) =>
             LocationViewModel(locationRepository: locationRepository)),
     ChangeNotifierProvider(
-        create: (_) => WeatherViewModel(weatherRepository: weatherRepository)),
+        create: (_) => WeatherViewModel(
+          weatherRepository: weatherRepository,
+          locationStorageRepository: locationStorageRepository,
+        )),
     ChangeNotifierProvider(
         create: (_) => UnitViewModel(isC: isC!, isKmh: isKmh!)),
     ChangeNotifierProvider(create: (_) => DailySelectionViewModel()),

@@ -16,7 +16,7 @@ Future<void> main() async {
     setWindowTitle('Drizzzle');
     setWindowMinSize(const Size(400, 300));
     setWindowMaxSize(Size.infinite);
-    setWindowFrame(const Rect.fromLTWH(100, 100, 800, 600*2));
+    setWindowFrame(const Rect.fromLTWH(100, 100, 800, 1500));
   }
   final dbSingleton = DbSingleton();
   final db = await dbSingleton.database;

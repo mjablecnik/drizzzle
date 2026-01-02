@@ -131,7 +131,7 @@ class _SearchViewState extends State<SearchView> {
           leading: const Icon(Symbols.globe),
           onTap: () {
             Provider.of<WeatherViewModel>(context, listen: false)
-                .fetchAndSaveWeather(locationModel: location);
+                .fetchAndSaveWeatherWithPersistence(locationModel: location);
             searchController.clear();
             setState(() {
               searchController.closeView(null);

@@ -23,6 +23,9 @@ class HourlyView extends StatefulWidget {
 }
 
 class _HourlyViewState extends State<HourlyView> {
+  final ScrollController _scrollController = ScrollController();
+  int _lastSelectedDayIndex = -1;
+
   @override
   void initState() {
     super.initState();
@@ -32,7 +35,21 @@ class _HourlyViewState extends State<HourlyView> {
       
       dailySelectionViewModel.setAllHourlyData(widget.hourlyModelList);
       dailySelectionViewModel.setAllDailyData(widget.dailyModelList);
+      _lastSelectedDayIndex = dailySelectionViewModel.selectedDayIndex;
+      
+      // Initial scroll to noon after data is set
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (mounted) {
+          _scrollToNoon(dailySelectionViewModel.filteredHourlyData);
+        }
+      });
     });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -47,6 +64,46 @@ class _HourlyViewState extends State<HourlyView> {
         dailySelectionViewModel.setAllDailyData(widget.dailyModelList);
       });
     }
+  }
+
+  void _scrollToNoon(List<HourlyModel> hourlyData) {
+    if (hourlyData.isEmpty || !_scrollController.hasClients) return;
+    
+    int noonIndex = -1;
+    int closestToNoonIndex = 0;
+    int minDifferenceFromNoon = 24;
+    int currentHour = DateTime.now().hour - 3;
+    
+    for (int i = 0; i < hourlyData.length; i++) {
+      final hourlyTime = DateTime.parse(hourlyData[i].hourlyTime);
+      final hour = hourlyTime.hour;
+      
+      if (hour == currentHour) {
+        noonIndex = i;
+        break;
+      }
+      
+      final differenceFromNoon = (hour - 12).abs();
+      if (differenceFromNoon < minDifferenceFromNoon) {
+        minDifferenceFromNoon = differenceFromNoon;
+        closestToNoonIndex = i;
+      }
+    }
+    
+    final targetIndex = noonIndex != -1 ? noonIndex : closestToNoonIndex;
+    
+    // Calculate scroll position
+    // Each item width is approximately 80 (card width + padding)
+    // We want to center the noon item, so we scroll to show it in the middle
+    const double itemWidth = 88.0; // 72 (card width) + 8 (separator) + 8 (padding)
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double targetScrollPosition = (targetIndex * itemWidth) - (screenWidth / 2) + (itemWidth / 2);
+    
+    // Ensure we don't scroll beyond bounds
+    final double maxScrollExtent = _scrollController.position.maxScrollExtent;
+    final double clampedPosition = targetScrollPosition.clamp(0.0, maxScrollExtent);
+    
+    _scrollController.jumpTo(clampedPosition);
   }
 
   @override
@@ -118,6 +175,14 @@ class _HourlyViewState extends State<HourlyView> {
       builder: (context, dailySelectionViewModel, child) {
         final hourlyData = dailySelectionViewModel.filteredHourlyData;
         
+        // Check if day selection has changed and trigger scroll to noon
+        if (_lastSelectedDayIndex != dailySelectionViewModel.selectedDayIndex) {
+          _lastSelectedDayIndex = dailySelectionViewModel.selectedDayIndex;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _scrollToNoon(hourlyData);
+          });
+        }
+        
         if (hourlyData.isEmpty) {
           return const Center(
             child: Padding(
@@ -132,6 +197,7 @@ class _HourlyViewState extends State<HourlyView> {
         }
         
         final listView = ListView.separated(
+          controller: _scrollController,
           scrollDirection: Axis.horizontal,
           shrinkWrap: true,
           itemCount: hourlyData.length,

@@ -101,12 +101,12 @@ class DbClient {
     if (currentMaps.isEmpty) {
       return Result.error(Exception());
     }
-    var hourlyIds = List.generate(24, (int i) => i);
+    var hourlyIds = List.generate(24*8, (int i) => i);
     String placeholders = List.filled(hourlyIds.length, '?').join(',');
 
     List<Map> hourlyMaps = await db.query(HourlyTable.tableName,
         where: 'id IN ($placeholders)',
-        whereArgs: List.generate(24, (int i) => i));
+        whereArgs: List.generate(24*8, (int i) => i));
     if (hourlyMaps.isEmpty) {
       return Result.error(Exception());
     }

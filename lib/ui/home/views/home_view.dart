@@ -69,7 +69,10 @@ class _HomeViewState extends State<HomeView> {
         dailyTemperatureMin: val.dailyModelList.first.dailyTemperatureMin,
       ),
       const SizedBox(height: 8),
-      HourlyView(hourlyModelList: val.hourlyModelList),
+      HourlyView(
+        hourlyModelList: val.hourlyModelList,
+        dailyModelList: val.dailyModelList,
+      ),
       const SizedBox(height: 8),
       DailyView(dailyModelList: val.dailyModelList),
       const SizedBox(height: 8),

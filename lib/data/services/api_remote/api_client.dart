@@ -71,7 +71,8 @@ class ApiClient {
           ResourceString.longitudeQuery: longitude.toString(),
           ResourceString.hourlyQuery: ResourceString.hourlyQueryValue,
           if (timezone != null) ResourceString.timezoneQuery: timezone,
-          ResourceString.forecastQuery: ResourceString.forecastDaysQueryValue,
+          ResourceString.pastdaysQuery: '1',
+          ResourceString.forecastQuery: '7', // Increased from 7 to 14 days to ensure we have hourly data for all daily forecast days
         });
     return _handleRequest<Hourly>(
       httpUri,

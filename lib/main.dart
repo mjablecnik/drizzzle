@@ -14,8 +14,8 @@ Future<void> main() async {
 
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
     setWindowTitle('Drizzzle');
-    setWindowMinSize(const Size(800, 600));
-    setWindowMaxSize(const Size(800, 600));
+    setWindowMinSize(const Size(400, 300));
+    setWindowMaxSize(Size.infinite);
     setWindowFrame(const Rect.fromLTWH(100, 100, 800, 600));
   }
   final dbSingleton = DbSingleton();

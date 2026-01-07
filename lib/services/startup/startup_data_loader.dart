@@ -1,3 +1,4 @@
+import 'package:drizzzle/domain/models/location_model.dart';
 import 'package:drizzzle/services/startup/auto_refresh_service.dart';
 import 'package:drizzzle/ui/search/view_models/weather_view_model.dart';
 import 'package:flutter/foundation.dart';
@@ -48,7 +49,29 @@ class StartupDataLoader extends ChangeNotifier {
       _updateState(StartupLoadingState.loadingStoredLocation);
       await _weatherViewModel.loadStoredLocation();
       
-      // Check if we should perform auto refresh
+      // If no location is stored, set London as default
+      if (!_weatherViewModel.hasStoredLocation()) {
+        final londonLocation = LocationModel(
+          name: 'London',
+          latitude: 51.5074,
+          longitude: -0.1278,
+          timezone: 'Europe/London',
+          admin1: 'England',
+          country: 'United Kingdom',
+        );
+        
+        // Fetch and save weather for London with persistence
+        await _weatherViewModel.fetchAndSaveWeatherWithPersistence(
+          locationModel: londonLocation,
+        );
+        
+        _updateState(StartupLoadingState.completed);
+        _isInitializing = false;
+        _result = StartupResult.freshDataLoaded;
+        return _result!;
+      }
+      
+      // Check if we should perform auto refresh for existing location
       if (await shouldPerformAutoRefresh()) {
         _updateState(StartupLoadingState.fetchingFreshData);
         

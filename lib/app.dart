@@ -1,6 +1,7 @@
+import 'package:drizzzle/services/startup/startup_data_loader.dart';
 import 'package:drizzzle/ui/home/view_models/home_view_model.dart';
 import 'package:drizzzle/ui/home/views/home_view.dart';
-import 'package:drizzzle/ui/search/view_models/weather_view_model.dart';
+import 'package:drizzzle/ui/startup/startup_loading_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -17,36 +18,22 @@ class _AppState extends State<App> {
   void initState() {
     super.initState();
 
-    final WeatherViewModel weatherViewModel = context.read<WeatherViewModel>();
+    // Initialize startup data loader
+    final startupDataLoader = context.read<StartupDataLoader>();
     Future.microtask(() async {
-      // Load stored location first
-      await weatherViewModel.loadStoredLocation();
-      
-      // Try to get local weather first
-      try {
-        await weatherViewModel.getLocalWeather();
-      } catch (e) {
-        // If local weather fails and we have a stored location, try to refresh from stored location
-        if (weatherViewModel.hasStoredLocation()) {
-          try {
-            await weatherViewModel.refreshWeatherFromStoredLocation();
-          } catch (e) {
-            // Error refreshing from stored location - this is expected if API is unavailable
-          }
-        }
-        // If no stored location and no local weather, user will need to search for a location
-      }
+      await startupDataLoader.initializeApp();
     });
   }
 
   @override
   Widget build(BuildContext context) {
     final homeViewModel = Provider.of<HomeViewModel>(context);
+    final startupDataLoader = Provider.of<StartupDataLoader>(context);
+    
     TextTheme textTheme = GoogleFonts.interTextTheme();
     final colorScheme = homeViewModel.colorScheme;
 
     return MaterialApp(
-      //debugShowMaterialGrid: true,
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
@@ -59,7 +46,19 @@ class _AppState extends State<App> {
         scaffoldBackgroundColor: colorScheme.surface,
         canvasColor: colorScheme.surface,
       ),
-      home: const HomeView(),
+      home: _buildContent(startupDataLoader),
     );
+  }
+  
+  Widget _buildContent(StartupDataLoader startupDataLoader) {
+    if (startupDataLoader.isInitializing) {
+      return StartupLoadingIndicator(
+        state: startupDataLoader.loadingState,
+        errorMessage: startupDataLoader.errorMessage,
+        onRetry: startupDataLoader.retry,
+      );
+    }
+    
+    return const HomeView();
   }
 }

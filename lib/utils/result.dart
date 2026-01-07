@@ -23,6 +23,12 @@ sealed class Result<T> {
 
   /// Creates an error [Result], completed with the specified [error].
   const factory Result.error(Exception error) = Error._;
+  
+  /// Returns true if this is an Ok result
+  bool get isOk => this is Ok<T>;
+  
+  /// Returns true if this is an Error result
+  bool get isError => this is Error<T>;
 }
 
 /// Subclass of Result for values

@@ -3,6 +3,8 @@ import 'package:drizzzle/data/repositories/api_remote/weather_repository.dart';
 import 'package:drizzzle/data/repositories/storage_local/location_storage_repository.dart';
 import 'package:drizzzle/data/services/db_local/db_client.dart';
 import 'package:drizzzle/data/services/storage_local/location_storage_service.dart';
+import 'package:drizzzle/services/startup/auto_refresh_service.dart';
+import 'package:drizzzle/services/startup/startup_data_loader.dart';
 import 'package:drizzzle/ui/home/view_models/daily_selection_view_model.dart';
 import 'package:drizzzle/ui/home/view_models/home_view_model.dart';
 import 'package:drizzzle/ui/home/view_models/unit_view_model.dart';
@@ -24,6 +26,24 @@ List<SingleChildWidget> providers(DbClient dbClient, SharedPreferences pref) {
   final LocationStorageRepository locationStorageRepository = 
       LocationStorageRepository(storageService: locationStorageService);
   
+  // Create weather view model
+  final WeatherViewModel weatherViewModel = WeatherViewModel(
+    weatherRepository: weatherRepository,
+    locationStorageRepository: locationStorageRepository,
+  );
+  
+  // Create startup services
+  final AutoRefreshService autoRefreshService = AutoRefreshService(
+    weatherRepository: weatherRepository,
+    locationStorageRepository: locationStorageRepository,
+    prefs: pref,
+  );
+  
+  final StartupDataLoader startupDataLoader = StartupDataLoader(
+    weatherViewModel: weatherViewModel,
+    autoRefreshService: autoRefreshService,
+  );
+  
   final brightness = pref.getBool(SharedPreferencesKeys.brightnessKey);
   final indx = pref.getInt(SharedPreferencesKeys.colorKey);
 
@@ -42,11 +62,9 @@ List<SingleChildWidget> providers(DbClient dbClient, SharedPreferences pref) {
     ChangeNotifierProvider(
         create: (_) =>
             LocationViewModel(locationRepository: locationRepository)),
-    ChangeNotifierProvider(
-        create: (_) => WeatherViewModel(
-          weatherRepository: weatherRepository,
-          locationStorageRepository: locationStorageRepository,
-        )),
+    ChangeNotifierProvider.value(value: weatherViewModel),
+    ChangeNotifierProvider.value(value: startupDataLoader),
+    Provider.value(value: autoRefreshService),
     ChangeNotifierProvider(
         create: (_) => UnitViewModel(isC: isC!, isKmh: isKmh!)),
     ChangeNotifierProvider(create: (_) => DailySelectionViewModel()),

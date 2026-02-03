@@ -44,13 +44,13 @@ class WeatherViewModel extends ChangeNotifier {
     // First, save the location
     final locationSaveResult = await _locationStorageRepository.persistLocation(locationModel);
     
-    // Then fetch and save weather data
-    _weather = await _weatherRepository.fetchAndSaveWeather(locationModel);
-    
-    // Update current location if weather fetch was successful and location was saved
-    if (_weather is Ok<Weather> && locationSaveResult is Ok<void>) {
+    // Always update current location if location was saved successfully
+    if (locationSaveResult is Ok<void>) {
       _currentLocation = locationModel;
     }
+    
+    // Then fetch and save weather data
+    _weather = await _weatherRepository.fetchAndSaveWeather(locationModel);
 
     _loading = false;
     notifyListeners();
@@ -68,8 +68,11 @@ class WeatherViewModel extends ChangeNotifier {
         case Ok<LocationModel?>():
           final location = locationResult.value;
           if (location != null) {
-            _weather = await _weatherRepository.fetchAndSaveWeather(location);
+            // Always update current location first
             _currentLocation = location;
+            
+            // Then fetch and save weather data
+            _weather = await _weatherRepository.fetchAndSaveWeather(location);
           } else {
             _weather = Result.error(Exception('No stored location found'));
           }
@@ -91,6 +94,10 @@ class WeatherViewModel extends ChangeNotifier {
     switch (locationResult) {
       case Ok<LocationModel?>():
         _currentLocation = locationResult.value;
+        // If we have a location but no weather data, try to load it from local storage
+        if (_currentLocation != null && _weather == null) {
+          _weather = await _weatherRepository.getLocalWeather();
+        }
         notifyListeners();
       case Error<LocationModel?>():
         _currentLocation = null;

@@ -50,7 +50,7 @@ class StartupDataLoader extends ChangeNotifier {
       await _weatherViewModel.loadStoredLocation();
       
       // If no location is stored, set London as default
-      if (!_weatherViewModel.hasStoredLocation()) {
+      if (!_weatherViewModel.hasStoredLocation() || _weatherViewModel.currentLocation == null) {
         final londonLocation = LocationModel(
           name: 'London',
           latitude: 51.5074,
@@ -85,15 +85,31 @@ class StartupDataLoader extends ChangeNotifier {
         } else {
           // If refresh failed, try to load cached data
           await _weatherViewModel.getLocalWeather();
-          _result = _weatherViewModel.weather != null 
-              ? StartupResult.cachedDataLoaded 
+          
+          // If we still don't have weather data but have a location, try to fetch it
+          if (_weatherViewModel.weather == null && _weatherViewModel.currentLocation != null) {
+            await _weatherViewModel.fetchAndSaveWeather(
+              locationModel: _weatherViewModel.currentLocation!,
+            );
+          }
+          
+          _result = _weatherViewModel.weather != null
+              ? StartupResult.cachedDataLoaded
               : StartupResult.noDataAvailable;
         }
       } else {
         // Skip refresh, try to get local weather
         await _weatherViewModel.getLocalWeather();
-        _result = _weatherViewModel.weather != null 
-            ? StartupResult.cachedDataLoaded 
+        
+        // If we still don't have weather data but have a location, try to fetch it
+        if (_weatherViewModel.weather == null && _weatherViewModel.currentLocation != null) {
+          await _weatherViewModel.fetchAndSaveWeather(
+            locationModel: _weatherViewModel.currentLocation!,
+          );
+        }
+        
+        _result = _weatherViewModel.weather != null
+            ? StartupResult.cachedDataLoaded
             : StartupResult.noDataAvailable;
       }
       

@@ -43,7 +43,7 @@ class StartupLoadingIndicator extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               Text(
-                'Chyba při načítání dat',
+                'Error loading data',
                 style: theme.textTheme.headlineSmall?.copyWith(
                   color: theme.colorScheme.error,
                 ),
@@ -64,7 +64,7 @@ class StartupLoadingIndicator extends StatelessWidget {
               if (onRetry != null)
                 ElevatedButton(
                   onPressed: onRetry,
-                  child: const Text('Zkusit znovu'),
+                  child: const Text('Try again'),
                 ),
             ],
           ],
@@ -76,17 +76,17 @@ class StartupLoadingIndicator extends StatelessWidget {
   String _getLoadingMessage(StartupLoadingState state) {
     switch (state) {
       case StartupLoadingState.initializing:
-        return 'Spouštění aplikace...';
+        return 'Starting application...';
       case StartupLoadingState.loadingStoredLocation:
-        return 'Načítání uložené lokace...';
+        return 'Loading saved location...';
       case StartupLoadingState.fetchingFreshData:
-        return 'Stahování nejnovějších dat...';
+        return 'Downloading latest data...';
       case StartupLoadingState.processingData:
-        return 'Zpracování dat...';
+        return 'Processing data...';
       case StartupLoadingState.completed:
-        return 'Dokončeno';
+        return 'Completed';
       case StartupLoadingState.error:
-        return 'Chyba';
+        return 'Error';
     }
   }
 }
